@@ -5,9 +5,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run wasm:build && vite build",
     "preview": "vite preview",
-    "wasm:build": "wasm-pack build ../web --target web --out-dir ../web/public/pkg && rm -f ../web/public/pkg/.gitignore"
+    "wasm:build": "wasm-pack build ../web --target web --out-dir ../web/public/pkg && rm -f ../web/public/pkg/.gitignore",
+    "build:dev": "vite build",
+    "build:prod": "npm install && npm run build"
   },
   "keywords": [
     "2048",
@@ -20,7 +22,9 @@
   "author": "Your Name",
   "license": "MIT",
   "devDependencies": {
+    "sharp": "^0.34.3",
     "vite": "^5.0.0",
+    "vite-plugin-pwa": "^1.0.2",
     "wasm-pack": "^0.12.0"
   },
   "dependencies": {
