@@ -1,5 +1,6 @@
 use crate::error::{GameError, GameResult};
 use serde::{Deserialize, Serialize};
+use std::cmp::Reverse;
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -179,7 +180,7 @@ impl StatisticsManager {
 
         // Get recent games (last 10)
         let mut recent_games = self.sessions.clone();
-        recent_games.sort_by(|a, b| b.end_time.cmp(&a.end_time));
+        recent_games.sort_by_key(|session| Reverse(session.end_time));
         recent_games.truncate(10);
 
         StatisticsSummary {
@@ -202,7 +203,7 @@ impl StatisticsManager {
     /// Get score trend data (last N games)
     pub fn get_score_trend(&self, count: usize) -> Vec<(u32, u32)> {
         let mut recent_sessions = self.sessions.clone();
-        recent_sessions.sort_by(|a, b| b.end_time.cmp(&a.end_time));
+        recent_sessions.sort_by_key(|session| Reverse(session.end_time));
         recent_sessions.truncate(count);
         recent_sessions.reverse();
 
@@ -216,7 +217,7 @@ impl StatisticsManager {
     /// Get efficiency trend data (last N games)
     pub fn get_efficiency_trend(&self, count: usize) -> Vec<(u32, f64)> {
         let mut recent_sessions = self.sessions.clone();
-        recent_sessions.sort_by(|a, b| b.end_time.cmp(&a.end_time));
+        recent_sessions.sort_by_key(|session| Reverse(session.end_time));
         recent_sessions.truncate(count);
         recent_sessions.reverse();
 
