@@ -399,11 +399,7 @@ impl ChartsDisplay {
         let mut chart_lines = Vec::new();
 
         for (tile, count) in &tile_data {
-            let bar_length = if max_count > 0 {
-                (count * 20) / max_count
-            } else {
-                0
-            };
+            let bar_length = count.saturating_mul(20).checked_div(max_count).unwrap_or(0);
 
             let bar = "█".repeat(bar_length as usize);
             let line = format!("{:>6} | {:>3} | {}", tile, count, bar);

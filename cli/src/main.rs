@@ -549,25 +549,21 @@ fn run_game<B: ratatui::backend::Backend>(
                     KeyCode::Char('q') | KeyCode::Esc => {
                         return Ok(());
                     }
-                    KeyCode::Up | KeyCode::Char('w') | KeyCode::Char('k') => {
-                        if game.state() == GameState::Playing {
-                            let _ = game.make_move(Direction::Up);
-                        }
+                    KeyCode::Up | KeyCode::Char('w') | KeyCode::Char('k')
+                        if game.state() == GameState::Playing =>
+                    {
+                        let _ = game.make_move(Direction::Up);
                     }
-                    KeyCode::Down | KeyCode::Char('s') | KeyCode::Char('j') => {
-                        if game.state() == GameState::Playing {
-                            let _ = game.make_move(Direction::Down);
-                        }
+                    KeyCode::Down | KeyCode::Char('s') | KeyCode::Char('j')
+                        if game.state() == GameState::Playing =>
+                    {
+                        let _ = game.make_move(Direction::Down);
                     }
-                    KeyCode::Left | KeyCode::Char('a') => {
-                        if game.state() == GameState::Playing {
-                            let _ = game.make_move(Direction::Left);
-                        }
+                    KeyCode::Left | KeyCode::Char('a') if game.state() == GameState::Playing => {
+                        let _ = game.make_move(Direction::Left);
                     }
-                    KeyCode::Right | KeyCode::Char('d') => {
-                        if game.state() == GameState::Playing {
-                            let _ = game.make_move(Direction::Right);
-                        }
+                    KeyCode::Right | KeyCode::Char('d') if game.state() == GameState::Playing => {
+                        let _ = game.make_move(Direction::Right);
                     }
                     KeyCode::Char('r') => {
                         let _ = game.new_game();
@@ -575,10 +571,8 @@ fn run_game<B: ratatui::backend::Backend>(
                         show_win = false;
                         game_start_time = rusty2048_core::get_current_time();
                     }
-                    KeyCode::Char('u') => {
-                        if game.state() == GameState::Playing {
-                            let _ = game.undo();
-                        }
+                    KeyCode::Char('u') if game.state() == GameState::Playing => {
+                        let _ = game.undo();
                     }
                     KeyCode::Char('t') => {
                         theme_manager.next_theme();
@@ -630,69 +624,55 @@ fn run_game<B: ratatui::backend::Backend>(
                             }
                         }
                     }
-                    KeyCode::Char('o') => {
+                    KeyCode::Char('o') if ai_mode && ai_controller.is_some() => {
                         // Toggle AI auto-play
-                        if ai_mode && ai_controller.is_some() {
-                            ai_auto_play = !ai_auto_play;
-                        }
+                        ai_auto_play = !ai_auto_play;
                     }
-                    KeyCode::Char('[') => {
+                    KeyCode::Char('[') if ai_mode => {
                         // Switch to previous AI algorithm
-                        if ai_mode {
-                            if let Some(controller) = &mut ai_controller {
-                                let current_algo = controller.algorithm();
-                                let new_algo = match current_algo {
-                                    AIAlgorithm::Greedy => AIAlgorithm::MCTS,
-                                    AIAlgorithm::Expectimax => AIAlgorithm::Greedy,
-                                    AIAlgorithm::MCTS => AIAlgorithm::Expectimax,
-                                };
-                                match AIGameController::new(game.config().clone(), new_algo) {
-                                    Ok(new_controller) => ai_controller = Some(new_controller),
-                                    Err(e) => eprintln!("Failed to switch AI algorithm: {}", e),
-                                }
+                        if let Some(controller) = &mut ai_controller {
+                            let current_algo = controller.algorithm();
+                            let new_algo = match current_algo {
+                                AIAlgorithm::Greedy => AIAlgorithm::MCTS,
+                                AIAlgorithm::Expectimax => AIAlgorithm::Greedy,
+                                AIAlgorithm::MCTS => AIAlgorithm::Expectimax,
+                            };
+                            match AIGameController::new(game.config().clone(), new_algo) {
+                                Ok(new_controller) => ai_controller = Some(new_controller),
+                                Err(e) => eprintln!("Failed to switch AI algorithm: {}", e),
                             }
                         }
                     }
-                    KeyCode::Char(']') => {
+                    KeyCode::Char(']') if ai_mode => {
                         // Switch to next AI algorithm
-                        if ai_mode {
-                            if let Some(controller) = &mut ai_controller {
-                                let current_algo = controller.algorithm();
-                                let new_algo = match current_algo {
-                                    AIAlgorithm::Greedy => AIAlgorithm::Expectimax,
-                                    AIAlgorithm::Expectimax => AIAlgorithm::MCTS,
-                                    AIAlgorithm::MCTS => AIAlgorithm::Greedy,
-                                };
-                                match AIGameController::new(game.config().clone(), new_algo) {
-                                    Ok(new_controller) => ai_controller = Some(new_controller),
-                                    Err(e) => eprintln!("Failed to switch AI algorithm: {}", e),
-                                }
+                        if let Some(controller) = &mut ai_controller {
+                            let current_algo = controller.algorithm();
+                            let new_algo = match current_algo {
+                                AIAlgorithm::Greedy => AIAlgorithm::Expectimax,
+                                AIAlgorithm::Expectimax => AIAlgorithm::MCTS,
+                                AIAlgorithm::MCTS => AIAlgorithm::Greedy,
+                            };
+                            match AIGameController::new(game.config().clone(), new_algo) {
+                                Ok(new_controller) => ai_controller = Some(new_controller),
+                                Err(e) => eprintln!("Failed to switch AI algorithm: {}", e),
                             }
                         }
                     }
-                    KeyCode::Char('+') | KeyCode::Char('=') => {
+                    KeyCode::Char('+') | KeyCode::Char('=') if ai_mode => {
                         // Increase AI speed (decrease delay)
-                        if ai_mode {
-                            ai_speed = (ai_speed as i32 - 100).max(100) as u64;
-                        }
+                        ai_speed = (ai_speed as i32 - 100).max(100) as u64;
                     }
-                    KeyCode::Char('-') => {
+                    KeyCode::Char('-') if ai_mode => {
                         // Decrease AI speed (increase delay)
-                        if ai_mode {
-                            ai_speed = (ai_speed + 100).min(2000);
-                        }
+                        ai_speed = (ai_speed + 100).min(2000);
                     }
-                    KeyCode::Char('x') => {
+                    KeyCode::Char('x') if show_charts => {
                         // Previous chart mode
-                        if show_charts {
-                            charts_display.prev_mode();
-                        }
+                        charts_display.prev_mode();
                     }
-                    KeyCode::Char('z') => {
+                    KeyCode::Char('z') if show_charts => {
                         // Next chart mode
-                        if show_charts {
-                            charts_display.next_mode();
-                        }
+                        charts_display.next_mode();
                     }
                     _ => {}
                 }
