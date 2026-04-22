@@ -240,7 +240,7 @@ impl StatisticsManager {
             .into_iter()
             .collect();
 
-        tile_counts.sort_by(|a, b| a.0.cmp(&b.0));
+        tile_counts.sort_by_key(|entry| entry.0);
         tile_counts
     }
 
