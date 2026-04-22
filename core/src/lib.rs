@@ -31,8 +31,7 @@ pub use stats::{create_session_stats, GameSessionStats, StatisticsManager, Stati
 pub fn get_current_time() -> u64 {
     #[cfg(target_arch = "wasm32")]
     {
-        // For WASM, return 0 for now
-        0
+        (js_sys::Date::now() / 1000.0) as u64
     }
     #[cfg(not(target_arch = "wasm32"))]
     {

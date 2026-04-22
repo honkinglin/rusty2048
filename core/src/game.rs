@@ -98,6 +98,11 @@ impl Game {
         &self.config
     }
 
+    /// Check whether an undo action is currently available.
+    pub fn can_undo(&self) -> bool {
+        self.config.allow_undo && self.previous_board.is_some() && self.previous_score.is_some()
+    }
+
     /// Get game statistics
     pub fn stats(&self) -> GameStats {
         let current_time = Self::get_current_time();
@@ -511,20 +516,7 @@ impl Game {
     /// Get current time in seconds since Unix epoch
     /// Uses different implementations for different targets
     pub fn get_current_time() -> u64 {
-        #[cfg(target_arch = "wasm32")]
-        {
-            // For WASM, we'll use a simple approach - just return 0 for now
-            // In a real implementation, you'd use js_sys::Date or similar
-            0
-        }
-
-        #[cfg(not(target_arch = "wasm32"))]
-        {
-            std::time::SystemTime::now()
-                .duration_since(std::time::UNIX_EPOCH)
-                .unwrap()
-                .as_secs()
-        }
+        crate::get_current_time()
     }
 }
 

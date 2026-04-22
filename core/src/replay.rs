@@ -1,4 +1,4 @@
-use crate::{Direction, Game, GameConfig, GameError, GameResult};
+use crate::{Direction, Game, GameConfig, GameError, GameResult, Score};
 use serde::{Deserialize, Serialize};
 
 /// A single move in the replay
@@ -204,7 +204,13 @@ pub struct ReplayPlayer {
 impl ReplayPlayer {
     /// Create a new replay player
     pub fn new(replay_data: ReplayData) -> GameResult<Self> {
-        let current_game = Game::new(replay_data.config.clone())?;
+        let mut current_game = Game::new(replay_data.config.clone())?;
+        current_game.load_from_state(
+            flatten_board(&replay_data.initial_board),
+            Score::new(),
+            0,
+            crate::GameState::Playing,
+        )?;
 
         Ok(Self {
             replay_data,
@@ -226,10 +232,10 @@ impl ReplayPlayer {
     }
 
     /// Stop the replay and reset to beginning
-    pub fn stop(&mut self) {
+    pub fn stop(&mut self) -> GameResult<()> {
         self.playing = false;
         self.current_move = 0;
-        self.reset_game();
+        self.reset_game()
     }
 
     /// Go to next move
@@ -238,11 +244,10 @@ impl ReplayPlayer {
             return Ok(false);
         }
 
-        let replay_move = &self.replay_data.moves[self.current_move];
+        let replay_move = self.replay_data.moves[self.current_move].clone();
 
-        // Apply the move to current game
-        self.current_game.make_move(replay_move.direction)?;
         self.current_move += 1;
+        self.restore_position(self.current_move, &replay_move)?;
 
         Ok(true)
     }
@@ -274,20 +279,26 @@ impl ReplayPlayer {
     }
 
     /// Reset game to initial state
-    fn reset_game(&mut self) {
-        self.current_game = Game::new(self.replay_data.config.clone()).unwrap();
+    fn reset_game(&mut self) -> GameResult<()> {
+        self.current_game.load_from_state(
+            flatten_board(&self.replay_data.initial_board),
+            Score::new(),
+            0,
+            crate::GameState::Playing,
+        )
     }
 
     /// Reset game to specific move
     fn reset_to_move(&mut self, move_index: usize) -> GameResult<()> {
-        self.reset_game();
+        self.reset_game()?;
+        self.current_move = move_index;
 
-        for i in 0..move_index {
-            let replay_move = &self.replay_data.moves[i];
-            self.current_game.make_move(replay_move.direction)?;
+        if move_index == 0 {
+            return Ok(());
         }
 
-        Ok(())
+        let replay_move = self.replay_data.moves[move_index - 1].clone();
+        self.restore_position(move_index, &replay_move)
     }
 
     /// Get current game state
@@ -338,6 +349,27 @@ impl ReplayPlayer {
             (self.current_move as f32 / self.replay_data.moves.len() as f32) * 100.0
         }
     }
+
+    fn restore_position(&mut self, move_index: usize, replay_move: &ReplayMove) -> GameResult<()> {
+        let state = if move_index == self.replay_data.moves.len() {
+            self.replay_data.final_state.clone()
+        } else {
+            crate::GameState::Playing
+        };
+        let last_move_score = replay_move.score_after.saturating_sub(replay_move.score_before);
+        let score = Score::from_parts(replay_move.score_after, replay_move.score_after, last_move_score);
+
+        self.current_game.load_from_state(
+            flatten_board(&replay_move.board_after),
+            score,
+            move_index as u32,
+            state,
+        )
+    }
+}
+
+fn flatten_board(board: &[Vec<u32>]) -> Vec<u32> {
+    board.iter().flat_map(|row| row.iter().copied()).collect()
 }
 
 /// Replay manager for handling multiple replays
@@ -392,5 +424,42 @@ impl ReplayManager {
 impl Default for ReplayManager {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn replay_player_restores_recorded_board_state() {
+        let config = GameConfig {
+            seed: Some(7),
+            ..Default::default()
+        };
+        let mut recorder = ReplayRecorder::new(config).unwrap();
+
+        let directions = [
+            Direction::Left,
+            Direction::Up,
+            Direction::Right,
+            Direction::Down,
+        ];
+        let mut recorded_move = None;
+
+        for direction in directions {
+            if recorder.make_move(direction).unwrap() {
+                recorded_move = recorder.replay_data().moves.last().cloned();
+                break;
+            }
+        }
+
+        let recorded_move = recorded_move.expect("expected at least one valid recorded move");
+        let replay_data = recorder.stop_recording();
+        let mut player = ReplayPlayer::new(replay_data).unwrap();
+
+        assert!(player.next_move().unwrap());
+        assert_eq!(player.current_game().board().to_vec(), recorded_move.board_after);
+        assert_eq!(player.current_game().score().current(), recorded_move.score_after);
     }
 }

@@ -66,7 +66,7 @@ impl GameManager {
             moves: self.game.moves(),
             game_state: game_state.to_string(),
             max_tile: self.game.board().max_tile(),
-            can_undo: true, // TODO: Add public method to check undo availability
+            can_undo: self.game.can_undo(),
             theme: self.theme.clone(),
         }
     }
@@ -186,34 +186,7 @@ async fn get_translation(
 ) -> Result<String, String> {
     let game_manager = state.lock().map_err(|_| "lock poisoned".to_string())?;
 
-    // Convert string key to TranslationKey enum
-    let translation_key = match key.as_str() {
-        "score" => TranslationKey::Score,
-        "best" => TranslationKey::Best,
-        "moves" => TranslationKey::Moves,
-        "time" => TranslationKey::Time,
-        "new_game" => TranslationKey::NewGame,
-        "undo" => TranslationKey::Undo,
-        "game_over" => TranslationKey::GameOver,
-        "congratulations" => TranslationKey::Congratulations,
-        "you_won" => TranslationKey::YouWon,
-        "press_r_to_restart" => TranslationKey::PressRToRestart,
-        "continue_playing" => TranslationKey::ContinuePlaying,
-        "controls" => TranslationKey::Controls,
-        "move_tiles" => TranslationKey::MoveTiles,
-        "restart" => TranslationKey::Restart,
-        "undo_move" => TranslationKey::UndoMove,
-        "cycle_theme" => TranslationKey::CycleTheme,
-        "select_theme" => TranslationKey::SelectTheme,
-        "theme_help" => TranslationKey::ThemeHelp,
-        "replay_mode" => TranslationKey::ReplayMode,
-        "statistics_charts" => TranslationKey::StatisticsCharts,
-        "ai_mode" => TranslationKey::AIMode,
-        "help" => TranslationKey::Help,
-        "quit" => TranslationKey::Quit,
-        "language" => TranslationKey::Help, // Use Help as placeholder for "Language"
-        _ => TranslationKey::Help,          // Default fallback
-    };
+    let translation_key = TranslationKey::from_key(&key).unwrap_or(TranslationKey::Help);
 
     Ok(game_manager.i18n.t(&translation_key))
 }

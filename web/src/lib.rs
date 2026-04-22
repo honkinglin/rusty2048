@@ -77,34 +77,7 @@ impl Rusty2048Web {
 
     /// Get translation for a key
     pub fn get_translation(&self, key: &str) -> String {
-        // Convert string key to TranslationKey enum
-        let translation_key = match key {
-            "score" => TranslationKey::Score,
-            "best" => TranslationKey::Best,
-            "moves" => TranslationKey::Moves,
-            "time" => TranslationKey::Time,
-            "new_game" => TranslationKey::NewGame,
-            "undo" => TranslationKey::Undo,
-            "game_over" => TranslationKey::GameOver,
-            "congratulations" => TranslationKey::Congratulations,
-            "you_won" => TranslationKey::YouWon,
-            "press_r_to_restart" => TranslationKey::PressRToRestart,
-            "continue_playing" => TranslationKey::ContinuePlaying,
-            "controls" => TranslationKey::Controls,
-            "move_tiles" => TranslationKey::MoveTiles,
-            "restart" => TranslationKey::Restart,
-            "undo_move" => TranslationKey::UndoMove,
-            "cycle_theme" => TranslationKey::CycleTheme,
-            "select_theme" => TranslationKey::SelectTheme,
-            "theme_help" => TranslationKey::ThemeHelp,
-            "replay_mode" => TranslationKey::ReplayMode,
-            "statistics_charts" => TranslationKey::StatisticsCharts,
-            "ai_mode" => TranslationKey::AIMode,
-            "help" => TranslationKey::Help,
-            "quit" => TranslationKey::Quit,
-            "language" => TranslationKey::Help, // Use Help as placeholder for "Language"
-            _ => TranslationKey::Help,          // Default fallback
-        };
+        let translation_key = TranslationKey::from_key(key).unwrap_or(TranslationKey::Help);
 
         self.i18n.t(&translation_key)
     }

@@ -36,6 +36,15 @@ impl Score {
         self.last_move
     }
 
+    /// Restore a score snapshot from serialized state.
+    pub fn from_parts(current: u32, best: u32, last_move: u32) -> Self {
+        Self {
+            current,
+            best,
+            last_move,
+        }
+    }
+
     /// Add points from a merge
     pub fn add_merge_points(&mut self, merged_value: u32) {
         self.last_move = merged_value;
@@ -112,5 +121,14 @@ mod tests {
         assert_eq!(Score::calculate_merge_score(4), 4);
         assert_eq!(Score::calculate_merge_score(8), 8);
         assert_eq!(Score::calculate_merge_score(2048), 2048);
+    }
+
+    #[test]
+    fn test_restore_score_snapshot() {
+        let score = Score::from_parts(128, 256, 16);
+
+        assert_eq!(score.current(), 128);
+        assert_eq!(score.best(), 256);
+        assert_eq!(score.last_move(), 16);
     }
 }

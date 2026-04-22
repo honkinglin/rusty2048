@@ -17,6 +17,9 @@ thiserror.workspace = true
 rand.workspace = true
 getrandom.workspace = true
 
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+js-sys.workspace = true
+
 [dev-dependencies]
 proptest.workspace = true
 criterion.workspace = true

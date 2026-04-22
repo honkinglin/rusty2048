@@ -44,14 +44,14 @@ run_cli() {
     print_status "Starting CLI version..."
     
     # Check if CLI binary exists
-    if binary_exists "target/release/rusty2048-cli"; then
+    if binary_exists "target/release/rusty2048"; then
         print_success "Running CLI version..."
-        ./target/release/rusty2048-cli
+        ./target/release/rusty2048
     else
         print_warning "CLI binary not found. Building first..."
         cargo build --release -p rusty2048-cli
         print_success "Running CLI version..."
-        ./target/release/rusty2048-cli
+        ./target/release/rusty2048
     fi
 }
 

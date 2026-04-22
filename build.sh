@@ -42,8 +42,8 @@ build_cli() {
     cargo build --release -p rusty2048-cli
     
     print_success "CLI version built successfully!"
-    echo "   Binary location: target/release/rusty2048-cli"
-    echo "   To run: cargo run -p rusty2048-cli"
+    echo "   Binary location: target/release/rusty2048"
+    echo "   To run: cargo run -p rusty2048-cli --bin rusty2048"
 }
 
 # Function to build Web version

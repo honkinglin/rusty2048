@@ -3360,7 +3360,7 @@ dependencies = [
 
 [[package]]
 name = "rusty2048-cli"
-version = "0.1.0"
+version = "0.1.6"
 dependencies = [
  "crossterm",
  "plotters",
@@ -3375,10 +3375,11 @@ dependencies = [
 
 [[package]]
 name = "rusty2048-core"
-version = "0.1.0"
+version = "0.1.6"
 dependencies = [
  "criterion",
  "getrandom 0.2.16",
+ "js-sys",
  "proptest",
  "rand 0.8.5",
  "serde",
@@ -3388,7 +3389,7 @@ dependencies = [
 
 [[package]]
 name = "rusty2048-desktop"
-version = "0.1.0"
+version = "0.1.6"
 dependencies = [
  "rusty2048-core",
  "rusty2048-shared",
@@ -3400,7 +3401,7 @@ dependencies = [
 
 [[package]]
 name = "rusty2048-shared"
-version = "0.1.0"
+version = "0.1.6"
 dependencies = [
  "serde",
  "serde_json",
@@ -3408,7 +3409,7 @@ dependencies = [
 
 [[package]]
 name = "rusty2048-web"
-version = "0.1.0"
+version = "0.1.6"
 dependencies = [
  "console_error_panic_hook",
  "getrandom 0.2.16",
