@@ -356,8 +356,14 @@ impl ReplayPlayer {
         } else {
             crate::GameState::Playing
         };
-        let last_move_score = replay_move.score_after.saturating_sub(replay_move.score_before);
-        let score = Score::from_parts(replay_move.score_after, replay_move.score_after, last_move_score);
+        let last_move_score = replay_move
+            .score_after
+            .saturating_sub(replay_move.score_before);
+        let score = Score::from_parts(
+            replay_move.score_after,
+            replay_move.score_after,
+            last_move_score,
+        );
 
         self.current_game.load_from_state(
             flatten_board(&replay_move.board_after),
@@ -459,7 +465,13 @@ mod tests {
         let mut player = ReplayPlayer::new(replay_data).unwrap();
 
         assert!(player.next_move().unwrap());
-        assert_eq!(player.current_game().board().to_vec(), recorded_move.board_after);
-        assert_eq!(player.current_game().score().current(), recorded_move.score_after);
+        assert_eq!(
+            player.current_game().board().to_vec(),
+            recorded_move.board_after
+        );
+        assert_eq!(
+            player.current_game().score().current(),
+            recorded_move.score_after
+        );
     }
 }
